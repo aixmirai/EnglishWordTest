@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>英単語メモリー</title>
+<style>
+:root,[data-theme="light"]{--bg:#f6f4ef;--surface:#fffdfa;--surface2:#f1ece3;--text:#221f1b;--muted:#6f675c;--primary:#0f766e;--good:#2f7d32;--mid:#a16207;--bad:#b42318;--border:#d8d1c4;--shadow:0 16px 36px rgba(37,31,20,.08)}
+[data-theme="dark"]{--bg:#171614;--surface:#201e1b;--surface2:#2a2723;--text:#f2eee8;--muted:#b8afa4;--primary:#56beb5;--good:#7fdb84;--mid:#f4c24f;--bad:#ff938a;--border:#433d36;--shadow:0 18px 40px rgba(0,0,0,.34)}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;background:linear-gradient(180deg,var(--bg),var(--surface2));color:var(--text)}button,select{font:inherit}
+.wrap{min-height:100dvh;padding:16px;display:flex;align-items:center;justify-content:center}.app{width:min(100%,760px);background:var(--surface);border:1px solid var(--border);border-radius:28px;box-shadow:var(--shadow);overflow:hidden}.header{padding:18px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,color-mix(in srgb,var(--primary) 8%,var(--surface)) 0%,var(--surface) 100%)}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;border-radius:14px;background:var(--primary);color:#fff;display:grid;place-items:center}.logo svg{width:24px;height:24px}.title{font-size:20px;font-weight:900}.subtitle{margin-top:2px;color:var(--muted);font-size:13px}
+.iconbtn,.btn,select,.statButton{min-height:46px;border-radius:14px}.iconbtn{min-width:46px;border:1px solid var(--border);background:var(--surface);color:var(--text)}.main{padding:18px;display:grid;gap:14px}.card,.panel{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:18px}
+.grid2,.stats,.actions,.gradeRow,.endActions{display:grid;gap:10px}.grid2{grid-template-columns:repeat(3,1fr)}.actions,.gradeRow,.endActions{grid-template-columns:1fr 1fr}.stats{grid-template-columns:repeat(3,1fr)}.field{display:grid;gap:8px}.field label{font-size:13px;font-weight:700;color:var(--muted)}select{width:100%;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:10px 12px}
+.stat,.statButton{background:var(--surface2);border:1px solid var(--border);border-radius:18px;padding:12px;text-align:left}.statButton{cursor:pointer;color:var(--text)}.statButton:hover{border-color:color-mix(in srgb,var(--primary) 45%,var(--border));transform:translateY(-1px)}.statButton:disabled{cursor:not-allowed;opacity:.6;transform:none}.stat .k,.statButton .k{color:var(--muted);font-size:12px}.stat .v,.statButton .v{margin-top:4px;font-size:20px;font-weight:900}.statButton .hint{margin-top:6px;font-size:12px;color:var(--muted)}
+.btn{border:none;padding:0 16px;font-weight:800}.btn.primary{background:var(--primary);color:#fff}.btn.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.btn.ghost{background:transparent;color:var(--muted);border:1px dashed var(--border)}.btn.good{background:color-mix(in srgb,var(--good) 18%,var(--surface));color:var(--good);border:1px solid color-mix(in srgb,var(--good) 45%,var(--border))}.btn.mid{background:color-mix(in srgb,var(--mid) 16%,var(--surface));color:var(--mid);border:1px solid color-mix(in srgb,var(--mid) 38%,var(--border))}.btn.bad{background:color-mix(in srgb,var(--bad) 12%,var(--surface));color:var(--bad);border:1px solid color-mix(in srgb,var(--bad) 35%,var(--border))}.wide{grid-column:1 / -1}
+.pillrow{display:flex;gap:8px;flex-wrap:wrap}.pill{padding:7px 10px;border-radius:999px;background:var(--surface2);border:1px solid var(--border);font-size:12px;color:var(--muted)}.word{font-size:clamp(40px,10vw,64px);line-height:1.06;font-weight:950;margin:8px 0 4px;word-break:break-word}.answer{margin-top:10px;background:var(--surface2);border:1px dashed var(--border);border-radius:20px;padding:15px;min-height:96px}.answer.hidden,.hidden{display:none!important}.answerLabel{font-size:12px;color:var(--muted);font-weight:700}.answerText{margin-top:8px;font-size:28px;font-weight:900;line-height:1.3}.list{margin:0;padding-left:18px}.list li{margin:6px 0}.loading{padding:28px;color:var(--muted);text-align:center}.studyTop,.studyBottom{display:grid;gap:12px}.singleAction{display:grid;grid-template-columns:1fr}.bottomActions{display:grid;grid-template-columns:1fr;gap:10px}
+.reviewMeta{display:flex;gap:8px;flex-wrap:wrap}.reviewList{display:grid;gap:10px}.reviewItem{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px;border-radius:18px;border:1px solid var(--border);background:var(--surface2)}.reviewTexts{display:grid;gap:6px}.reviewEn{font-size:18px;font-weight:900}.reviewJa{font-size:15px;color:var(--muted);line-height:1.5}.emptyText{color:var(--muted);line-height:1.6}
+@media (max-width:640px){.grid2,.stats,.actions,.gradeRow,.endActions{grid-template-columns:1fr}.reviewItem{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap"><main class="app">
+<section class="header"><div class="topbar"><div class="brand"><div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4.5h9a3 3 0 0 1 3 3V19l-4-2-4 2-4-2V7.5a3 3 0 0 1 3-3Z"></path><path d="M9 8h5"></path><path d="M9 11h6"></path></svg></div><div><div class="title">英単語メモリー</div><div class="subtitle">英語を見て、日本語を思い出す</div></div></div><button class="iconbtn" id="themeBtn" aria-label="テーマ切替">☀️</button></div></section>
+<div id="loading" class="loading">CSVを読み込み中...</div>
+<section class="main hidden" id="homeView">
+<div class="card grid2">
+<div class="field"><label for="modeSelect">学習モード</label><select id="modeSelect"><option value="unit_all">Unitごと</option><option value="unit_weak">このUnitの苦手</option><option value="all_weak">全範囲の苦手</option><option value="unit_random">このUnitのランダム</option><option value="all_random">全範囲のランダム</option></select></div>
+<div class="field"><label for="unitSelect">範囲</label><select id="unitSelect"></select></div>
+<div class="field"><label for="directionSelect">出題方向</label><select id="directionSelect"><option value="en_to_ja">英語 → 日本語</option><option value="ja_to_en">日本語 → 英語</option></select></div>
+</div>
+<div class="stats">
+<div class="stat"><div class="k">できた</div><div class="v" id="masteredCount">0</div></div>
+<button class="statButton" id="reviewCardBtn"><div class="k">要復習</div><div class="v" id="weakCount">0</div><div class="hint">押すと一覧を開く</div></button>
+<div class="stat"><div class="k">保存数</div><div class="v" id="savedCount">0</div></div>
+</div>
+<div class="actions"><button class="btn primary wide" id="startBtn">開始</button><button class="btn ghost wide" id="resetBtn">保存データをリセット</button></div>
+</section>
+<section class="main hidden" id="studyView">
+<div class="studyTop">
+<div class="card">
+<div class="pillrow"><span class="pill" id="modeBadge">Unitごと</span><span class="pill" id="unitBadge">Unit 1-1</span><span class="pill" id="directionBadge">英語 → 日本語</span></div>
+<div class="word" id="wordText">English</div>
+<div class="singleAction"><button class="btn primary wide" id="revealBtn">正解を見る</button></div>
+<div class="answer hidden" id="answerBox"><div class="answerLabel">正解</div><div class="answerText" id="answerText">日本語</div></div>
+<div class="gradeRow hidden" id="gradeRow"><button class="btn good" id="goodBtn">◎ できた</button><button class="btn mid" id="midBtn">△ あいまい</button><button class="btn bad wide" id="badBtn">× わからない</button></div>
+</div>
+</div>
+<div class="studyBottom">
+<div class="stats"><div class="stat"><div class="k">進み具合</div><div class="v" id="progressText">1 / 20</div></div><div class="stat"><div class="k">できた</div><div class="v" id="goodCount">0</div></div><div class="stat"><div class="k">要復習</div><div class="v" id="reviewCount">0</div></div></div>
+<div class="bottomActions"><button class="btn ghost wide" id="homeBtn">ホームへ戻る</button></div>
+</div>
+</section>
+<section class="main hidden" id="reviewListView">
+<div class="panel">
+<h2>要復習一覧</h2>
+<div class="reviewMeta"><span class="pill" id="reviewModeBadge">Unitごと</span><span class="pill" id="reviewUnitBadge">Unit 1-1</span><span class="pill" id="reviewDirectionBadge">英語 → 日本語</span></div>
+</div>
+<div class="panel"><div id="reviewListContainer" class="reviewList"></div></div>
+<div class="endActions"><button class="btn secondary" id="reviewBackBtn">ホームへ戻る</button><button class="btn primary" id="reviewAllBtn">要復習をまとめて開始</button></div>
+</section>
+<section class="main hidden" id="endView"><div class="panel"><h2>おわり</h2><div id="summaryText"></div></div><div class="panel"><h2>もう一度やる単語</h2><div id="reviewList">なし</div></div><div class="endActions"><button class="btn primary" id="againWeakBtn">今回の要復習だけ</button><button class="btn secondary" id="sameModeBtn">同じ条件でもう一回</button><button class="btn ghost wide" id="endHomeBtn">ホームへ戻る</button></div></section>
+</main></div>
+<script>
+const STORAGE_KEY='english_memory_app_csv_v7';
+const INTERVALS=[0,1,3,7,14,30];
+const MODE_LABEL={unit_all:'Unitごと',unit_weak:'このUnitの苦手',all_weak:'全範囲の苦手',unit_random:'このUnitのランダム',all_random:'全範囲のランダム'};
+const DIRECTION_LABEL={en_to_ja:'英語 → 日本語',ja_to_en:'日本語 → 英語'};
+const $=id=>document.getElementById(id);
+const state={words:[],units:[],selectedUnit:'',selectedMode:'unit_all',selectedDirection:'en_to_ja',storage:loadStorage(),queue:[],current:0,revealed:false,sessionResults:[],reviewWords:[]};
+function loadStorage(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{words:{}}}catch{return {words:{}}}}
+function saveStorage(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state.storage))}
+function getWordKey(id){return `${id}__${state.selectedDirection}`}
+function getWordState(id){return state.storage.words[getWordKey(id)]||{seen:0,good:0,mid:0,bad:0,streak:0,nextDue:0,updatedDay:0}}
+function setWordState(id,v){state.storage.words[getWordKey(id)]=v;saveStorage()}
+function dayNumber(){return Math.floor(Date.now()/86400000)}
+function shuffle(arr){const copy=[...arr];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]]}return copy}
+function show(viewId){['homeView','studyView','reviewListView','endView'].forEach(id=>$(id).classList.add('hidden'));$(viewId).classList.remove('hidden')}
+function applyTheme(mode){document.documentElement.setAttribute('data-theme',mode);$('themeBtn').textContent=mode==='dark'?'🌙':'☀️'}
+function parseCSVLine(line){const cols=[];let cur='';let q=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else{q=!q}}else if(ch===','&&!q){cols.push(cur);cur=''}else{cur+=ch}}cols.push(cur);return cols}
+function parseCSV(text){const normalized=text.replace(/^\uFEFF/,'').split('\r\n').join('\n').split('\r').join('\n').trim();const lines=normalized?normalized.split('\n'):[];lines.shift();return lines.filter(Boolean).map((line,idx)=>{const cols=parseCSVLine(line);return {id:idx+1,unit:(cols[0]||'').trim(),en:(cols[1]||'').trim(),ja:(cols[2]||'').trim()}})}
+function buildUnits(){state.units=[...new Set(state.words.map(w=>w.unit).filter(Boolean))];$('unitSelect').innerHTML=state.units.map(u=>`<option value="${u}">${u}</option>`).join('');state.selectedUnit=state.units[0]||'';$('unitSelect').value=state.selectedUnit;$('directionSelect').value=state.selectedDirection}
+function unitWords(){return state.words.filter(w=>w.unit===state.selectedUnit)}
+function allWords(){return state.words}
+function getCurrentScopeWords(){return (state.selectedMode==='all_weak'||state.selectedMode==='all_random') ? allWords() : unitWords()}
+function weakScore(word){const s=getWordState(word.id);return(s.bad*100)+(s.mid*45)-(s.good*5)-(s.streak*40)+Math.random()}
+function weakWords(source){const arr=source.filter(w=>{const s=getWordState(w.id);return (s.bad+s.mid)>s.good});return arr.length?[...arr].sort((a,b)=>weakScore(b)-weakScore(a)):[...source].sort((a,b)=>weakScore(b)-weakScore(a))}
+function chooseSession(mode){if(mode==='unit_all') return unitWords(); if(mode==='unit_weak') return weakWords(unitWords()); if(mode==='all_weak') return weakWords(allWords()); if(mode==='unit_random') return shuffle(unitWords()); return shuffle(allWords())}
+function updateHomeStats(){const scope=getCurrentScopeWords();const mastered=scope.filter(w=>getWordState(w.id).good>0).length;const weak=scope.filter(w=>{const s=getWordState(w.id);return(s.bad+s.mid)>s.good}).length;$('masteredCount').textContent=mastered;$('weakCount').textContent=weak;$('savedCount').textContent=Object.keys(state.storage.words).length;$('reviewCardBtn').disabled=weak===0}
+function renderQuestion(){const item=state.queue[state.current];if(!item)return endSession();const promptText=state.selectedDirection==='ja_to_en'?item.ja:item.en;const answerText=state.selectedDirection==='ja_to_en'?item.en:item.ja;$('wordText').textContent=promptText;$('answerText').textContent=answerText;$('unitBadge').textContent=(state.selectedMode==='all_weak'||state.selectedMode==='all_random')?'全範囲':state.selectedUnit;$('modeBadge').textContent=MODE_LABEL[state.selectedMode];$('directionBadge').textContent=DIRECTION_LABEL[state.selectedDirection];$('progressText').textContent=`${state.current+1} / ${state.queue.length}`;$('answerBox').classList.toggle('hidden',!state.revealed);$('gradeRow').classList.toggle('hidden',!state.revealed);$('revealBtn').classList.toggle('hidden',state.revealed)}
+function updateStudyStats(){const good=state.sessionResults.filter(r=>r.result==='good').length;const review=state.sessionResults.filter(r=>r.result!=='good').length;$('goodCount').textContent=good;$('reviewCount').textContent=review}
+function startSession(customWords=null){state.queue=customWords?[...customWords]:chooseSession(state.selectedMode);state.current=0;state.revealed=false;state.sessionResults=[];show('studyView');renderQuestion();updateStudyStats()}
+function revealAnswer(){state.revealed=true;renderQuestion()}
+function rate(result){const item=state.queue[state.current];if(!item)return;const today=dayNumber();const s=getWordState(item.id);s.seen+=1;s.updatedDay=today;if(result==='good'){s.good+=1;s.streak=Math.min(s.streak+1,INTERVALS.length-1);s.nextDue=today+INTERVALS[s.streak]}else if(result==='mid'){s.mid+=1;s.streak=0;s.nextDue=today+1}else{s.bad+=1;s.streak=0;s.nextDue=today}setWordState(item.id,s);state.sessionResults.push({...item,result});state.current+=1;state.revealed=false;renderQuestion();updateStudyStats()}
+function endSession(){const good=state.sessionResults.filter(r=>r.result==='good').length;const mid=state.sessionResults.filter(r=>r.result==='mid').length;const bad=state.sessionResults.filter(r=>r.result==='bad').length;$('summaryText').innerHTML=`<p>${state.sessionResults.length}問中、◎ ${good} / △ ${mid} / × ${bad}</p>`;const reviews=state.sessionResults.filter(r=>r.result!=='good');$('reviewList').innerHTML=reviews.length?'<ul class="list">'+reviews.map(r=>`<li><strong>${escapeHtml(r.en)}</strong> → ${escapeHtml(r.ja)}</li>`).join('')+'</ul>':'なし';updateHomeStats();show('endView')}
+function retryWeak(){const weak=state.sessionResults.filter(r=>r.result!=='good').map(r=>state.words.find(w=>w.id===r.id)).filter(Boolean);startSession(weak.length?weak:chooseSession(state.selectedMode))}
+function goHome(){updateHomeStats();show('homeView')}
+function getReviewWords(){return getCurrentScopeWords().filter(w=>{const s=getWordState(w.id);return (s.bad+s.mid)>s.good})}
+function openReviewList(){state.reviewWords=getReviewWords();$('reviewModeBadge').textContent=MODE_LABEL[state.selectedMode];$('reviewUnitBadge').textContent=(state.selectedMode==='all_weak'||state.selectedMode==='all_random')?'全範囲':state.selectedUnit;$('reviewDirectionBadge').textContent=DIRECTION_LABEL[state.selectedDirection];const container=$('reviewListContainer');if(!state.reviewWords.length){container.innerHTML='<div class="emptyText">要復習の単語はありません。</div>';$('reviewAllBtn').disabled=true;}else{container.innerHTML=state.reviewWords.map(word=>`<div class="reviewItem"><div class="reviewTexts"><div class="reviewEn">${escapeHtml(word.en)}</div><div class="reviewJa">${escapeHtml(word.ja)}</div></div><button class="btn primary reviewStartBtn" data-id="${word.id}">復習開始</button></div>`).join('');$('reviewAllBtn').disabled=false;container.querySelectorAll('.reviewStartBtn').forEach(btn=>{btn.addEventListener('click',()=>{const word=state.words.find(w=>String(w.id)===btn.dataset.id);if(word) startSession([word])})})}show('reviewListView')}
+function startAllReview(){state.reviewWords=getReviewWords();if(state.reviewWords.length) startSession(state.reviewWords)}
+function escapeHtml(str){return String(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+$('themeBtn').addEventListener('click',()=>{const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';applyTheme(next)});
+$('unitSelect').addEventListener('change',e=>{state.selectedUnit=e.target.value;updateHomeStats()});
+$('modeSelect').addEventListener('change',e=>{state.selectedMode=e.target.value;updateHomeStats()});
+$('directionSelect').addEventListener('change',e=>{state.selectedDirection=e.target.value;updateHomeStats()});
+$('startBtn').addEventListener('click',()=>startSession());
+$('revealBtn').addEventListener('click',revealAnswer);
+$('goodBtn').addEventListener('click',()=>rate('good'));
+$('midBtn').addEventListener('click',()=>rate('mid'));
+$('badBtn').addEventListener('click',()=>rate('bad'));
+$('homeBtn').addEventListener('click',goHome);
+$('endHomeBtn').addEventListener('click',goHome);
+$('againWeakBtn').addEventListener('click',retryWeak);
+$('sameModeBtn').addEventListener('click',()=>startSession());
+$('reviewCardBtn').addEventListener('click',openReviewList);
+$('reviewBackBtn').addEventListener('click',goHome);
+$('reviewAllBtn').addEventListener('click',startAllReview);
+$('resetBtn').addEventListener('click',()=>{if(!confirm('保存データを消します。よいですか？'))return;localStorage.removeItem(STORAGE_KEY);state.storage=loadStorage();updateHomeStats()});
+async function init(){applyTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');const res=await fetch('./vocab_units.csv',{cache:'no-store'});if(!res.ok) throw new Error('CSVを読み込めません');const text=await res.text();state.words=parseCSV(text);buildUnits();updateHomeStats();$('loading').classList.add('hidden');show('homeView')}
+init().catch(err=>{$('loading').textContent='CSVの読み込みに失敗しました。index.html と vocab_units.csv を同じ場所に置いて公開URLから開いてください。';console.error(err)});
+</script>
+</body>
+</html>
