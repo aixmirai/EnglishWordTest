@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>英単語メモリー</title>
+<style>
+:root, [data-theme="light"] {
+  --bg:#f6f4ef;
+  --surface:#fffdf9;
+  --surface-2:#f1ece3;
+  --surface-3:#ebe5d9;
+  --text:#211f1b;
+  --muted:#6f675b;
+  --primary:#0f766e;
+  --primary-2:#0b5f58;
+  --good:#2f7d32;
+  --mid:#a16207;
+  --bad:#b42318;
+  --border:#d8d1c4;
+  --shadow:0 14px 34px rgba(37,31,20,.08);
+}
+[data-theme="dark"] {
+  --bg:#171614;
+  --surface:#201e1b;
+  --surface-2:#2a2723;
+  --surface-3:#322f2a;
+  --text:#f2eee8;
+  --muted:#b7afa4;
+  --primary:#56beb5;
+  --primary-2:#4ca49c;
+  --good:#7fdb84;
+  --mid:#f5c453;
+  --bad:#ff9288;
+  --border:#433d36;
+  --shadow:0 18px 40px rgba(0,0,0,.34);
+}
+* { box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
+body {
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  color:var(--text);
+  background:linear-gradient(180deg,var(--bg),var(--surface-2));
+}
+button,select { font:inherit; }
+.wrap {
+  min-height:100dvh;
+  padding:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.app {
+  width:min(100%, 760px);
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:28px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.header {
+  padding:18px 18px 14px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg, color-mix(in srgb, var(--primary) 8%, var(--surface)) 0%, var(--surface) 100%);
+}
+.topbar, .row, .controls, .stats, .action-row, .grade-row, .end-actions, .footer-row {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.topbar { align-items:center; justify-content:space-between; }
+.brand { display:flex; align-items:center; gap:12px; }
+.logo {
+  width:46px; height:46px; border-radius:14px; background:var(--primary); color:#fff; display:grid; place-items:center; flex:0 0 auto;
+}
+.logo svg { width:24px; height:24px; }
+.title { font-weight:900; font-size:20px; letter-spacing:.02em; }
+.subtitle { color:var(--muted); font-size:13px; margin-top:2px; }
+.iconbtn, .btn, select {
+  min-height:44px; border-radius:14px;
+}
+.iconbtn {
+  min-width:44px; border:1px solid var(--border); background:var(--surface); color:var(--text);
+}
+.main { padding:18px; display:grid; gap:14px; }
+.controls { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.control {
+  background:var(--surface-2); border:1px solid var(--border); border-radius:18px; padding:10px 12px;
+}
+.control label { display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:700; }
+.control select { width:100%; border:1px solid var(--border); background:var(--surface); color:var(--text); padding:10px 12px; }
+.stats { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.stat {
+  background:var(--surface-2); border:1px solid var(--border); border-radius:18px; padding:12px;
+}
+.stat .k { color:var(--muted); font-size:12px; }
+.stat .v { margin-top:4px; font-size:20px; font-weight:900; }
+.card {
+  border:1px solid var(--border); border-radius:26px; padding:18px; background:var(--surface);
+}
+.pillrow { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.pill { font-size:12px; color:var(--muted); border:1px solid var(--border); border-radius:999px; padding:7px 10px; background:var(--surface-2); }
+.word {
+  font-size:clamp(34px, 8vw, 54px);
+  line-height:1.06;
+  font-weight:950;
+  letter-spacing:.01em;
+  word-break:break-word;
+  margin:10px 0 8px;
+}
+.instruction {
+  font-size:14px; color:var(--muted); line-height:1.6;
+}
+.answer {
+  margin-top:14px;
+  border:1px dashed var(--border);
+  border-radius:22px;
+  padding:16px;
+  background:var(--surface-2);
+}
+.answer.hidden { display:none; }
+.answer-label { font-size:12px; color:var(--muted); font-weight:700; }
+.answer-text { margin-top:8px; font-size:26px; font-weight:900; line-height:1.3; }
+.btn {
+  border:none; padding:0 16px; font-weight:800;
+}
+.btn.primary { background:var(--primary); color:#fff; }
+.btn.secondary { background:var(--surface-2); color:var(--text); border:1px solid var(--border); }
+.btn.ghost { background:transparent; color:var(--muted); border:1px dashed var(--border); }
+.btn.good { background:color-mix(in srgb, var(--good) 18%, var(--surface)); color:var(--good); border:1px solid color-mix(in srgb, var(--good) 45%, var(--border)); }
+.btn.mid { background:color-mix(in srgb, var(--mid) 16%, var(--surface)); color:var(--mid); border:1px solid color-mix(in srgb, var(--mid) 38%, var(--border)); }
+.btn.bad { background:color-mix(in srgb, var(--bad) 12%, var(--surface)); color:var(--bad); border:1px solid color-mix(in srgb, var(--bad) 35%, var(--border)); }
+.action-row, .grade-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.action-row .wide, .grade-row .wide { grid-column:1 / -1; }
+.panel {
+  border:1px solid var(--border); border-radius:22px; padding:14px 16px; background:var(--surface-2);
+}
+.panel h2 { margin:0 0 8px; font-size:18px; }
+.list { margin:0; padding-left:18px; }
+.list li { margin:6px 0; }
+.muted { color:var(--muted); }
+.end { display:none; }
+.end.show { display:grid; gap:14px; }
+.hidden { display:none !important; }
+.badges { display:flex; flex-wrap:wrap; gap:8px; }
+.badge { padding:8px 11px; border-radius:999px; background:var(--surface-2); border:1px solid var(--border); font-size:12px; }
+.small { font-size:12px; }
+.footer { padding:0 18px 18px; color:var(--muted); font-size:12px; line-height:1.6; }
+@media (max-width:640px) {
+  .controls, .stats, .action-row, .grade-row { grid-template-columns:1fr; }
+}
+@media (prefers-reduced-motion:no-preference) {
+  .app, .btn, .iconbtn, select { transition:.18s ease; }
+  .btn:active, .iconbtn:active { transform:translateY(1px) scale(.99); }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <main class="app" aria-label="英単語メモリー">
+    <section class="header">
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 4.5h9a3 3 0 0 1 3 3V19l-4-2-4 2-4-2V7.5a3 3 0 0 1 3-3Z"></path>
+              <path d="M9 8h5"></path>
+              <path d="M9 11h6"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="title">英単語メモリー</div>
+            <div class="subtitle">見る → 思い出す → 正解を見る → できた / あいまい / わからない</div>
+          </div>
+        </div>
+        <button class="iconbtn" id="themeBtn" aria-label="テーマ切替">☀️</button>
+      </div>
+    </section>
+
+    <section class="main" id="studyView">
+      <div class="controls">
+        <div class="control">
+          <label for="modeSelect">学習モード</label>
+          <select id="modeSelect">
+            <option value="recommended">おすすめ20問</option>
+            <option value="weak">苦手20問</option>
+            <option value="random">ランダム20問</option>
+            <option value="set">セット別20問</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="setSelect">範囲</label>
+          <select id="setSelect"></select>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="k">進み具合</div><div class="v" id="progressText">1 / 20</div></div>
+        <div class="stat"><div class="k">できた</div><div class="v" id="goodCount">0</div></div>
+        <div class="stat"><div class="k">要復習</div><div class="v" id="reviewCount">0</div></div>
+        <div class="stat"><div class="k">定着</div><div class="v" id="masteredCount">0</div></div>
+      </div>
+
+      <div class="card">
+        <div class="pillrow">
+          <span class="pill" id="setBadge">セット1</span>
+          <span class="pill" id="statusBadge">まず頭の中で答える</span>
+        </div>
+        <div class="word" id="wordText">English</div>
+        <div class="instruction">先に日本語を頭の中で思い出してから、下の「正解を見る」を押してください。入力は不要です。</div>
+        <div class="answer hidden" id="answerBox">
+          <div class="answer-label">正解</div>
+          <div class="answer-text" id="answerText">日本語</div>
+        </div>
+      </div>
+
+      <div class="action-row" id="actionRow">
+        <button class="btn primary wide" id="revealBtn">正解を見る</button>
+        <button class="btn secondary" id="skipBtn">あとで出す</button>
+        <button class="btn ghost" id="restartBtn">この20問をやり直す</button>
+      </div>
+
+      <div class="grade-row hidden" id="gradeRow">
+        <button class="btn good" id="goodBtn">◎ できた</button>
+        <button class="btn mid" id="midBtn">△ あいまい</button>
+        <button class="btn bad wide" id="badBtn">× わからない</button>
+      </div>
+
+      <div class="panel">
+        <h2>このアプリの動き</h2>
+        <ul class="list small muted">
+          <li>20問ずつ回します。</li>
+          <li>過去の結果をブラウザ内に保存し、苦手な単語を優先して出します。</li>
+          <li>「できた」は間隔をあけて再出題し、「わからない」は早めに再登場させます。</li>
+        </ul>
+      </div>
+
+      <div class="badges" id="todayBadges"></div>
+    </section>
+
+    <section class="main end" id="endView">
+      <div class="panel">
+        <h2>20問おわり</h2>
+        <div id="summaryText"></div>
+      </div>
+      <div class="panel">
+        <h2>今回の要復習</h2>
+        <div id="reviewList" class="muted">なし</div>
+      </div>
+      <div class="end-actions">
+        <button class="btn primary" id="againWeakBtn">今回まちがえた問題だけ復習</button>
+        <button class="btn secondary" id="newSessionBtn">次の20問へ</button>
+        <button class="btn ghost" id="resetDataBtn">保存データをリセット</button>
+      </div>
+    </section>
+
+    <div class="footer">
+      GitHub Pages で公開したまま使えます。データはこのページを開いたブラウザごとに保存されます。ブラウザのデータ削除やシークレットモードでは保存が消えることがあります。
+    </div>
+  </main>
+</div>
+
+<script>
+const WORDS = [{"id": 1, "en": "eleven", "ja": "11(の)", "set": 1}, {"id": 2, "en": "twelve", "ja": "12(の)", "set": 1}, {"id": 3, "en": "thirteen", "ja": "13(の)", "set": 1}, {"id": 4, "en": "fourteen", "ja": "14(の)", "set": 1}, {"id": 5, "en": "fifteen", "ja": "15(の)", "set": 1}, {"id": 6, "en": "sixteen", "ja": "16(の)", "set": 1}, {"id": 7, "en": "seventeen", "ja": "17(の)", "set": 1}, {"id": 8, "en": "eighteen", "ja": "18(の)", "set": 1}, {"id": 9, "en": "I", "ja": "私は[が]", "set": 1}, {"id": 10, "en": "my", "ja": "私の", "set": 1}, {"id": 11, "en": "me", "ja": "私を[に]", "set": 1}, {"id": 12, "en": "you", "ja": "あなた(たち)は[が]", "set": 1}, {"id": 13, "en": "fan", "ja": "ファン", "set": 1}, {"id": 14, "en": "friend", "ja": "友達", "set": 1}, {"id": 15, "en": "everyone", "ja": "みなさん、みんな、だれでも", "set": 1}, {"id": 16, "en": "classmate", "ja": "同級生", "set": 1}, {"id": 17, "en": "math", "ja": "数学", "set": 1}, {"id": 18, "en": "science", "ja": "科学、理科", "set": 1}, {"id": 19, "en": "English", "ja": "英語", "set": 1}, {"id": 20, "en": "Japanese", "ja": "国語(の)、日本語(の)", "set": 1}, {"id": 21, "en": "art", "ja": "芸術、美術", "set": 2}, {"id": 22, "en": "club", "ja": "クラブ、部", "set": 2}, {"id": 23, "en": "lesson", "ja": "授業、レッスン", "set": 2}, {"id": 24, "en": "school", "ja": "学校", "set": 2}, {"id": 25, "en": "great", "ja": "すばらしい、とても楽しい", "set": 2}, {"id": 26, "en": "soft", "ja": "やわらかい", "set": 2}, {"id": 27, "en": "low", "ja": "(高さ・位置などが)低い", "set": 2}, {"id": 28, "en": "high", "ja": "高い", "set": 2}, {"id": 29, "en": "often", "ja": "しばしば、よく", "set": 2}, {"id": 30, "en": "now", "ja": "今、現在は、今では、今すぐ", "set": 2}, {"id": 31, "en": "fast", "ja": "速く", "set": 2}, {"id": 32, "en": "always", "ja": "いつも、常に", "set": 2}, {"id": 33, "en": "call", "ja": "…を(…と)呼ぶ、名づける", "set": 2}, {"id": 34, "en": "join", "ja": "…に加わる、参加する", "set": 2}, {"id": 35, "en": "love", "ja": "…が大好きである、…を愛している", "set": 2}, {"id": 36, "en": "watch", "ja": "…を(注意して)見る", "set": 2}, {"id": 37, "en": "draw", "ja": "(線画)をかく", "set": 2}, {"id": 38, "en": "take", "ja": "…を利用する、…を受ける", "set": 2}, {"id": 39, "en": "sing", "ja": "(…を)歌う", "set": 2}, {"id": 40, "en": "cook", "ja": "(…を)料理する", "set": 2}, {"id": 41, "en": "anime", "ja": "(日本の)アニメ", "set": 3}, {"id": 42, "en": "comic", "ja": "マンガ", "set": 3}, {"id": 43, "en": "game", "ja": "遊び、ゲーム", "set": 3}, {"id": 44, "en": "fishing", "ja": "魚つり", "set": 3}, {"id": 45, "en": "hiking", "ja": "ハイキング", "set": 3}, {"id": 46, "en": "reading", "ja": "読書、読むこと", "set": 3}, {"id": 47, "en": "shopping", "ja": "買い物", "set": 3}, {"id": 48, "en": "activity", "ja": "活動", "set": 3}, {"id": 49, "en": "home", "ja": "家庭、家", "set": 3}, {"id": 50, "en": "store", "ja": "店、商店", "set": 3}, {"id": 51, "en": "shrine", "ja": "神社", "set": 3}, {"id": 52, "en": "stadium", "ja": "スタジアム、競技場", "set": 3}, {"id": 53, "en": "office", "ja": "事務所、役所", "set": 3}, {"id": 54, "en": "bus stop", "ja": "バス停", "set": 3}, {"id": 55, "en": "supermarket", "ja": "スーパーマーケット", "set": 3}, {"id": 56, "en": "cute", "ja": "かわいい", "set": 3}, {"id": 57, "en": "strong", "ja": "強い、じょうぶな", "set": 3}, {"id": 58, "en": "sour", "ja": "酸っぱい", "set": 3}, {"id": 59, "en": "bitter", "ja": "苦い", "set": 3}, {"id": 60, "en": "fresh", "ja": "新鮮な", "set": 3}, {"id": 61, "en": "spicy", "ja": "香辛料のきいた、辛い", "set": 4}, {"id": 62, "en": "thirsty", "ja": "のどのかわいた", "set": 4}, {"id": 63, "en": "delicious", "ja": "とてもおいしい", "set": 4}, {"id": 64, "en": "food", "ja": "食べ物", "set": 4}, {"id": 65, "en": "lunch", "ja": "昼食", "set": 4}, {"id": 66, "en": "lemon", "ja": "レモン", "set": 4}, {"id": 67, "en": "cherry", "ja": "さくらんぼ", "set": 4}, {"id": 68, "en": "cake", "ja": "ケーキ", "set": 4}, {"id": 69, "en": "sweet", "ja": "あまい菓子、キャンディー", "set": 4}, {"id": 70, "en": "parfait", "ja": "パフェ", "set": 4}, {"id": 71, "en": "sandwich", "ja": "サンドイッチ", "set": 4}, {"id": 72, "en": "knee", "ja": "ひざ", "set": 4}, {"id": 73, "en": "leg", "ja": "脚", "set": 4}, {"id": 74, "en": "neck", "ja": "首", "set": 4}, {"id": 75, "en": "hair", "ja": "髪", "set": 4}, {"id": 76, "en": "nose", "ja": "鼻", "set": 4}, {"id": 77, "en": "tooth", "ja": "歯", "set": 4}, {"id": 78, "en": "head", "ja": "頭", "set": 4}, {"id": 79, "en": "mouth", "ja": "口", "set": 4}, {"id": 80, "en": "cool", "ja": "かっこいい", "set": 4}, {"id": 81, "en": "new", "ja": "新しい、新任の", "set": 5}, {"id": 82, "en": "old", "ja": "古い", "set": 5}, {"id": 83, "en": "welcome", "ja": "歓迎された", "set": 5}, {"id": 84, "en": "some", "ja": "いくつかの、いくらかの", "set": 5}, {"id": 85, "en": "very", "ja": "非常に、[否定文で]あまり(…でない)", "set": 5}, {"id": 86, "en": "well", "ja": "じょうずに、うまく、よく", "set": 5}, {"id": 87, "en": "usually", "ja": "たいてい、ふつう", "set": 5}, {"id": 88, "en": "tea", "ja": "茶、紅茶", "set": 5}, {"id": 89, "en": "juice", "ja": "ジュース", "set": 5}, {"id": 90, "en": "coffee", "ja": "コーヒー", "set": 5}, {"id": 91, "en": "beef", "ja": "牛肉", "set": 5}, {"id": 92, "en": "cheese", "ja": "チーズ", "set": 5}, {"id": 93, "en": "bread", "ja": "パン、食パン", "set": 5}, {"id": 94, "en": "rice", "ja": "米、稲、ご飯", "set": 5}, {"id": 95, "en": "cooking", "ja": "料理、料理法", "set": 5}, {"id": 96, "en": "team", "ja": "チーム、組", "set": 5}, {"id": 97, "en": "student", "ja": "学生、生徒", "set": 5}, {"id": 98, "en": "teacher", "ja": "先生、教師", "set": 5}, {"id": 99, "en": "textbook", "ja": "教科書", "set": 5}, {"id": 100, "en": "notebook", "ja": "ノート", "set": 5}, {"id": 101, "en": "library", "ja": "図書館、図書室", "set": 6}, {"id": 102, "en": "classroom", "ja": "教室", "set": 6}, {"id": 103, "en": "swimming pool", "ja": "(水泳用の)プール", "set": 6}, {"id": 104, "en": "parent", "ja": "親、[parentsで]親たち、両親", "set": 6}, {"id": 105, "en": "father", "ja": "父、お父さん", "set": 6}, {"id": 106, "en": "mother", "ja": "母、お母さん", "set": 6}, {"id": 107, "en": "sister", "ja": "姉、妹、姉妹", "set": 6}, {"id": 108, "en": "brother", "ja": "兄、弟、兄弟", "set": 6}, {"id": 109, "en": "cousin", "ja": "いとこ", "set": 6}, {"id": 110, "en": "grandfather", "ja": "祖父", "set": 6}, {"id": 111, "en": "grandmother", "ja": "祖母", "set": 6}, {"id": 112, "en": "white", "ja": "白(い)", "set": 6}, {"id": 113, "en": "black", "ja": "黒(い)", "set": 6}, {"id": 114, "en": "red", "ja": "赤(い)", "set": 6}, {"id": 115, "en": "blue", "ja": "青(い)", "set": 6}, {"id": 116, "en": "pink", "ja": "ピンク(色の)", "set": 6}, {"id": 117, "en": "purple", "ja": "紫(色の)", "set": 6}, {"id": 118, "en": "yellow", "ja": "黄色(い)", "set": 6}, {"id": 119, "en": "color", "ja": "色、色彩", "set": 6}];
+const STORAGE_KEY = 'english_memory_app_v2';
+const SESSION_SIZE = 20;
+const INTERVALS = [0, 1, 3, 7, 14, 30];
+
+const $ = (id) => document.getElementById(id);
+const state = {
+  storage: loadStorage(),
+  session: [],
+  queue: [],
+  current: 0,
+  revealed: false,
+  sessionResults: [],
+};
+
+function dayNumber() {
+  return Math.floor(Date.now() / 86400000);
+}
+
+function loadStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { words: {}, updatedAt: Date.now() };
+    const parsed = JSON.parse(raw);
+    return { words: parsed.words || {}, updatedAt: parsed.updatedAt || Date.now() };
+  } catch {
+    return { words: {}, updatedAt: Date.now() };
+  }
+}
+
+function saveStorage() {
+  state.storage.updatedAt = Date.now();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.storage));
+}
+
+function getWordState(id) {
+  return state.storage.words[id] || { seen: 0, good: 0, mid: 0, bad: 0, streak: 0, nextDue: 0, updatedDay: 0 };
+}
+
+function setWordState(id, data) {
+  state.storage.words[id] = data;
+  saveStorage();
+}
+
+function applyTheme(mode) {
+  document.documentElement.setAttribute('data-theme', mode);
+  $('themeBtn').textContent = mode === 'dark' ? '🌙' : '☀️';
+}
+applyTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+$('themeBtn').addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+});
+
+function shuffle(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function setupSelects() {
+  const maxSet = Math.max(...WORDS.map(w => w.set));
+  $('setSelect').innerHTML = '<option value="all">全範囲</option>' + Array.from({ length: maxSet }, (_, i) => {
+    const n = i + 1;
+    return `<option value="${n}">セット${n}</option>`;
+  }).join('');
+}
+
+function scopeWords() {
+  const mode = $('modeSelect').value;
+  const setValue = $('setSelect').value;
+  let words = [...WORDS];
+  if (mode === 'set' && setValue !== 'all') {
+    words = words.filter(w => String(w.set) === setValue);
+  }
+  return words;
+}
+
+function recommendedScore(word) {
+  const s = getWordState(word.id);
+  const today = dayNumber();
+  let score = Math.random();
+  if (s.seen === 0) score += 100000;
+  if ((s.nextDue || 0) <= today) score += 50000;
+  score += (s.bad * 90) + (s.mid * 45) - (s.good * 10) - (s.streak * 35);
+  score += Math.max(0, today - (s.updatedDay || 0)) * 2;
+  return score;
+}
+
+function weakScore(word) {
+  const s = getWordState(word.id);
+  return (s.bad * 100) + (s.mid * 55) - (s.good * 8) - (s.streak * 40) + (s.seen === 0 ? 10 : 0) + Math.random();
+}
+
+function chooseSession() {
+  const mode = $('modeSelect').value;
+  const words = scopeWords();
+  let chosen = [];
+
+  if (mode === 'random') {
+    chosen = shuffle(words).slice(0, SESSION_SIZE);
+  } else if (mode === 'weak') {
+    chosen = [...words].sort((a, b) => weakScore(b) - weakScore(a)).slice(0, SESSION_SIZE);
+  } else if (mode === 'set') {
+    chosen = [...words].sort((a, b) => recommendedScore(b) - recommendedScore(a)).slice(0, SESSION_SIZE);
+  } else {
+    chosen = [...words].sort((a, b) => recommendedScore(b) - recommendedScore(a)).slice(0, SESSION_SIZE);
+  }
+
+  if (chosen.length < SESSION_SIZE) {
+    const ids = new Set(chosen.map(w => w.id));
+    const extra = shuffle(WORDS.filter(w => !ids.has(w.id))).slice(0, SESSION_SIZE - chosen.length);
+    chosen = chosen.concat(extra);
+  }
+  return chosen;
+}
+
+function startSession(customWords = null) {
+  state.session = customWords ? [...customWords] : chooseSession();
+  state.queue = [...state.session];
+  state.current = 0;
+  state.revealed = false;
+  state.sessionResults = [];
+  $('studyView').classList.remove('hidden');
+  $('endView').classList.remove('show');
+  $('endView').classList.add('end');
+  renderCard();
+  updateStats();
+}
+
+function currentWord() {
+  return state.queue[state.current];
+}
+
+function renderCard() {
+  const item = currentWord();
+  if (!item) return endSession();
+  $('wordText').textContent = item.en;
+  $('answerText').textContent = item.ja;
+  $('setBadge').textContent = `セット${item.set}`;
+  $('statusBadge').textContent = state.revealed ? '見たあとで自己判定する' : 'まず頭の中で答える';
+  $('progressText').textContent = `${state.current + 1} / ${state.queue.length}`;
+  $('answerBox').classList.toggle('hidden', !state.revealed);
+  $('gradeRow').classList.toggle('hidden', !state.revealed);
+  $('revealBtn').classList.toggle('hidden', state.revealed);
+}
+
+function updateStats() {
+  const good = state.sessionResults.filter(r => r.result === 'good').length;
+  const review = state.sessionResults.filter(r => r.result !== 'good').length;
+  const mastered = WORDS.filter(w => getWordState(w.id).streak >= 3).length;
+  $('goodCount').textContent = good;
+  $('reviewCount').textContent = review;
+  $('masteredCount').textContent = mastered;
+
+  const today = dayNumber();
+  const totalSeen = WORDS.filter(w => getWordState(w.id).updatedDay === today).length;
+  const dueCount = WORDS.filter(w => {
+    const s = getWordState(w.id);
+    return s.seen > 0 && (s.nextDue || 0) <= today;
+  }).length;
+  $('todayBadges').innerHTML = `
+    <span class="badge">今日さわった単語 ${totalSeen}</span>
+    <span class="badge">いま復習どき ${dueCount}</span>
+    <span class="badge">保存済み ${Object.keys(state.storage.words).length}</span>
+  `;
+}
+
+function revealAnswer() {
+  state.revealed = true;
+  renderCard();
+}
+
+function rate(result) {
+  const item = currentWord();
+  if (!item) return;
+  const today = dayNumber();
+  const s = getWordState(item.id);
+  s.seen += 1;
+  s.updatedDay = today;
+
+  if (result === 'good') {
+    s.good += 1;
+    s.streak = Math.min(s.streak + 1, INTERVALS.length - 1);
+    s.nextDue = today + INTERVALS[s.streak];
+  } else if (result === 'mid') {
+    s.mid += 1;
+    s.streak = 0;
+    s.nextDue = today + 1;
+  } else {
+    s.bad += 1;
+    s.streak = 0;
+    s.nextDue = today;
+  }
+  setWordState(item.id, s);
+  state.sessionResults.push({ ...item, result });
+  state.current += 1;
+  state.revealed = false;
+  renderCard();
+  updateStats();
+}
+
+function skipWord() {
+  const item = currentWord();
+  if (!item) return;
+  state.queue.push(item);
+  state.current += 1;
+  state.revealed = false;
+  renderCard();
+  updateStats();
+}
+
+function endSession() {
+  $('studyView').classList.add('hidden');
+  $('endView').classList.remove('end');
+  $('endView').classList.add('show');
+
+  const good = state.sessionResults.filter(r => r.result === 'good').length;
+  const mid = state.sessionResults.filter(r => r.result === 'mid').length;
+  const bad = state.sessionResults.filter(r => r.result === 'bad').length;
+  $('summaryText').innerHTML = `
+    <p><strong>${state.sessionResults.length}問</strong> 学習しました。</p>
+    <p>◎ できた ${good} / △ あいまい ${mid} / × わからない ${bad}</p>
+  `;
+
+  const reviews = state.sessionResults.filter(r => r.result !== 'good');
+  $('reviewList').innerHTML = reviews.length
+    ? '<ul class="list">' + reviews.map(r => `<li><strong>${escapeHtml(r.en)}</strong> → ${escapeHtml(r.ja)}</li>`).join('') + '</ul>'
+    : '今回は要復習なしです。';
+  updateStats();
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+}
+
+function retryWeak() {
+  const weak = state.sessionResults.filter(r => r.result !== 'good').map(r => WORDS.find(w => w.id === r.id));
+  if (!weak.length) return startSession();
+  startSession(weak);
+}
+
+function resetData() {
+  if (!confirm('保存した学習データを消します。よいですか？')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  state.storage = loadStorage();
+  startSession();
+}
+
+$('modeSelect').addEventListener('change', () => {
+  const isSet = $('modeSelect').value === 'set';
+  $('setSelect').disabled = !isSet;
+});
+$('revealBtn').addEventListener('click', revealAnswer);
+$('goodBtn').addEventListener('click', () => rate('good'));
+$('midBtn').addEventListener('click', () => rate('mid'));
+$('badBtn').addEventListener('click', () => rate('bad'));
+$('skipBtn').addEventListener('click', skipWord);
+$('restartBtn').addEventListener('click', () => startSession(state.session));
+$('againWeakBtn').addEventListener('click', retryWeak);
+$('newSessionBtn').addEventListener('click', () => startSession());
+$('resetDataBtn').addEventListener('click', resetData);
+
+setupSelects();
+$('setSelect').disabled = true;
+startSession();
+</script>
+</body>
+</html>
